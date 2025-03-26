@@ -51,3 +51,20 @@ func (cfg *Config) SetUser(username string) {
 	}
 
 }
+
+func (cfg *Config) GetUser() *Config {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dat, err := os.ReadFile(homeDirectory + "/" + filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := json.NewDecoder(bytes.NewReader(dat)).Decode(&cfg); err != nil {
+		log.Fatal(err)
+	}
+	return cfg
+}
