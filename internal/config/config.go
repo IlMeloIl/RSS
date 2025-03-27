@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 )
@@ -20,7 +21,32 @@ func Read() Config {
 		log.Fatal(err)
 	}
 
-	dat, err := os.ReadFile(homeDirectory + "/" + filename)
+	configPath := homeDirectory + "/" + filename
+
+	_, err = os.Stat(configPath)
+	if os.IsNotExist(err) {
+		defaultConfig := Config{
+			DbURL:           "postgres://usuario:senha@localhost:5432/rss_db?sslmode=disable",
+			CurrentUserName: "",
+		}
+
+		jsonData, err := json.Marshal(defaultConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = os.WriteFile(configPath, jsonData, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("Arquivo de configuração criado em: %s\n", configPath)
+		return defaultConfig
+	} else if err != nil {
+		log.Fatal(err)
+	}
+
+	dat, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
